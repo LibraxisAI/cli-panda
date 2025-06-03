@@ -42,12 +42,8 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = [
-    "postdevai_mlx",
-    "postdevai_mlx.models",
-    "postdevai_mlx.inference",
-    "postdevai_mlx.embedding",
-]
+package-dir = {"": "src/mlx"}
+packages = ["models", "inference", "embedding"]
 
 [tool.black]
 line-length = 100

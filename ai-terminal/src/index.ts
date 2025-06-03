@@ -32,8 +32,8 @@ class AITerminal {
       fullUnicode: true,
     });
 
-    // Main terminal window
-    this.terminal = blessed.terminal({
+    // Main terminal window (using box instead of terminal to avoid pty.js dependency)
+    this.terminal = blessed.box({
       parent: this.screen,
       top: 0,
       left: 0,
@@ -41,13 +41,19 @@ class AITerminal {
       height: '100%-1',
       border: 'line',
       scrollable: true,
+      alwaysScroll: true,
       mouse: true,
       keys: true,
+      vi: true,
+      scrollbar: {
+        ch: ' ',
+        bg: 'blue'
+      },
       style: {
         border: { fg: 'cyan' },
         focus: { border: { fg: 'green' } },
       },
-    });
+    }) as any;
 
     // Status bar
     this.statusBar = blessed.box({
@@ -75,7 +81,11 @@ class AITerminal {
 
     // Connect PTY to terminal
     this.ptyProcess.onData((data) => {
-      this.terminal.write(data);
+      // Append data to terminal content
+      const content = this.terminal.getContent() + data;
+      this.terminal.setContent(content);
+      this.terminal.scrollTo(this.terminal.getScrollHeight());
+      this.screen.render();
     });
 
     this.terminal.on('data', (data) => {
@@ -175,7 +185,12 @@ class AITerminal {
       await this.inlineAI.getStreamingResponse(
         this.currentInput,
         context,
-        (token) => this.terminal.write(token)
+        (token) => {
+          const content = this.terminal.getContent() + token;
+          this.terminal.setContent(content);
+          this.terminal.scrollTo(this.terminal.getScrollHeight());
+          this.screen.render();
+        }
       );
 
       this.currentInput = '';

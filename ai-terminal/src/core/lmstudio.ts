@@ -46,7 +46,7 @@ export class LMStudioService extends EventEmitter {
 
   async connect(): Promise<void> {
     try {
-      await this.client.connect();
+      // LMStudioClient doesn't need explicit connect
       const models = await this.client.model.list();
       
       // Find preferred model or use first available
