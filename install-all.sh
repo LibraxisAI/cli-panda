@@ -242,9 +242,14 @@ install_postdevai() {
     
     cd PostDevAi
     
-    # Build Rust components
-    info "Building Rust components..."
-    cargo build --release
+    # Build Rust components (allow failure since it's WIP)
+    info "Building Rust components (WIP - may fail)..."
+    if cargo build --release 2>/dev/null; then
+        success "PostDevAI Rust components built"
+    else
+        warning "PostDevAI Rust build failed (WIP - this is OK)"
+        info "You can fix and rebuild later with: cd PostDevAi && cargo build --release"
+    fi
     
     # Initialize Python components
     if [ ! -f "pyproject.toml" ]; then
@@ -257,9 +262,10 @@ install_postdevai() {
     
     # Verify installation
     if [ -f "./target/release/dragon_node" ]; then
-        success "PostDevAI Rust components built"
+        success "PostDevAI binaries available"
+    else
+        info "PostDevAI Python components ready: uv run python -m PostDevAi.client"
     fi
-    success "PostDevAI ready - Python components: uv run python -m PostDevAi.client"
     
     cd ..
 }
