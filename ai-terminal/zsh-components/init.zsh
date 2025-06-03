@@ -5,6 +5,17 @@
 export CLI_PANDA_HOME="$HOME/.zsh/cli-panda"
 export CLI_PANDA_CONFIG="$HOME/.config/cli-panda/config.json"
 
+# Enhanced history for AI context
+export HISTSIZE=10000
+export SAVEHIST=10000
+export HISTFILE="$HOME/.zsh_history"
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_VERIFY
+setopt SHARE_HISTORY
+setopt APPEND_HISTORY
+setopt INC_APPEND_HISTORY
+
 # Source components
 source "$CLI_PANDA_HOME/aliases.zsh"
 source "$CLI_PANDA_HOME/functions.zsh"

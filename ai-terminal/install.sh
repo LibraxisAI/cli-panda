@@ -271,16 +271,26 @@ setup_endpoints() {
 create_launcher() {
     echo -e "\n${BLUE}Creating launcher...${NC}"
     
-    LAUNCHER="$HOME/.local/bin/cli-panda"
+    # Create main launcher
+    LAUNCHER="$HOME/.local/bin/ai"
     mkdir -p "$HOME/.local/bin" || error_exit "Failed to create ~/.local/bin"
     
     cat > "$LAUNCHER" << EOF
 #!/bin/bash
-# CLI Panda launcher
+# CLI Panda AI Terminal launcher
 cd "$PWD" && npm start
 EOF
     
     chmod +x "$LAUNCHER" || error_exit "Failed to make launcher executable"
+    
+    # Create additional launchers
+    cat > "$HOME/.local/bin/cli-panda" << EOF
+#!/bin/bash
+# CLI Panda launcher (alias for ai)
+exec "$LAUNCHER" "\$@"
+EOF
+    
+    chmod +x "$HOME/.local/bin/cli-panda" || error_exit "Failed to make cli-panda executable"
     
     # Add to PATH if needed
     if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
