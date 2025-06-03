@@ -4,6 +4,8 @@ import { EventEmitter } from 'events';
 
 export interface LMStudioConfig {
   baseUrl?: string;
+  dragonUrl?: string;
+  useDragon?: boolean;
   model?: string;
   temperature?: number;
   maxTokens?: number;
@@ -19,6 +21,8 @@ export class LMStudioService extends EventEmitter {
     // Load from config file if exists
     let defaultConfig = {
       baseUrl: 'ws://localhost:1234',
+      dragonUrl: 'ws://libraxis.cloud:51234',
+      useDragon: true,
       model: 'qwen3-8b',
       temperature: 0.7,
       maxTokens: 200,
@@ -34,13 +38,18 @@ export class LMStudioService extends EventEmitter {
     
     this.config = {
       baseUrl: config.baseUrl || defaultConfig.baseUrl,
+      dragonUrl: config.dragonUrl || defaultConfig.dragonUrl,
+      useDragon: config.useDragon !== undefined ? config.useDragon : defaultConfig.useDragon,
       model: config.model || defaultConfig.model,
       temperature: config.temperature || defaultConfig.temperature,
       maxTokens: config.maxTokens || defaultConfig.maxTokens,
     };
     
+    // Try Dragon first if enabled
+    const urlToUse = this.config.useDragon ? this.config.dragonUrl : this.config.baseUrl;
+    
     this.client = new LMStudioClient({
-      baseUrl: this.config.baseUrl,
+      baseUrl: urlToUse,
     });
   }
 
@@ -59,6 +68,30 @@ export class LMStudioService extends EventEmitter {
       
       this.emit('connected', this.model.id);
     } catch (error) {
+      // If Dragon fails and we were trying it, fallback to local
+      if (this.config.useDragon && this.client.baseUrl?.includes('libraxis.cloud')) {
+        console.log('Dragon endpoint failed, falling back to local LM Studio...');
+        this.client = new LMStudioClient({
+          baseUrl: this.config.baseUrl,
+        });
+        
+        try {
+          const models = await this.client.model.list();
+          const preferredModel = models.find(m => m.id.includes(this.config.model!));
+          this.model = preferredModel || models[0];
+          
+          if (!this.model) {
+            throw new Error('No models available in local LM Studio');
+          }
+          
+          this.emit('connected', this.model.id + ' (local fallback)');
+          return;
+        } catch (fallbackError) {
+          this.emit('error', fallbackError);
+          throw fallbackError;
+        }
+      }
+      
       this.emit('error', error);
       throw error;
     }
