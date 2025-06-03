@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # CLI Panda One-Line Installer
-# Usage: curl -LsSf https://raw.githubusercontent.com/m-szymanska/cli-panda/main/install.sh | sh
+# Usage: curl -LsSf https://raw.githubusercontent.com/LibraxisAI/cli-panda/main/install.sh | sh
 #
 # Inspired by rustup, uv, and brew installers
 # This script does EVERYTHING in one go, just like brew and uv
