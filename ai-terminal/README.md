@@ -127,18 +127,23 @@ Config znajduje się w `~/.config/cli-panda/config.json`:
 
 ### Remote Endpoint with Fallback
 
-To use a remote LM Studio endpoint (e.g., Dragon server) with automatic fallback:
+To use a remote LM Studio server with automatic fallback:
 
 1. Set environment variables in `.env`:
    ```bash
-   LMSTUDIO_DRAGON_URL=ws://your-endpoint:port
-   LMSTUDIO_USE_DRAGON=true
+   LMSTUDIO_REMOTE_URL=ws://your-server:1234
+   LMSTUDIO_USE_REMOTE=true
    ```
 
 2. The terminal will:
-   - Try remote endpoint first
+   - Try remote endpoint first (if configured)
    - Automatically fall back to local LM Studio if remote fails
    - Show connection status in terminal
+
+This is useful if you have:
+- A more powerful server running LM Studio
+- A shared team server
+- A cloud instance with better models
 
 ### Edycja konfiguracji
 ```bash

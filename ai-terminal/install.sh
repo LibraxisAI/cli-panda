@@ -245,20 +245,21 @@ setup_endpoints() {
         echo -e "${GREEN}✅ Created .env file${NC}"
         
         # Ask if user wants to configure remote endpoint
-        echo -e "\n${YELLOW}Do you have a remote LM Studio endpoint (e.g., Dragon server)?${NC}"
+        echo -e "\n${YELLOW}Do you have a remote LM Studio server?${NC}"
         echo -e "Press Y to configure, N to use local only: \c"
         read -r response
         
         if [[ "$response" =~ ^[Yy]$ ]]; then
-            echo -e "\n${BLUE}Enter your remote endpoint URL (e.g., ws://example.com:51234):${NC} \c"
-            read -r dragon_url
+            echo -e "\n${BLUE}Enter your remote endpoint URL (e.g., ws://example.com:1234):${NC} \c"
+            read -r remote_url
             
-            if [ ! -z "$dragon_url" ]; then
+            if [ ! -z "$remote_url" ]; then
                 # Update .env file
-                sed -i.bak "s|LMSTUDIO_DRAGON_URL=.*|LMSTUDIO_DRAGON_URL=$dragon_url|" .env
-                sed -i.bak "s|LMSTUDIO_USE_DRAGON=.*|LMSTUDIO_USE_DRAGON=true|" .env
+                sed -i.bak "s|# LMSTUDIO_REMOTE_URL=.*|LMSTUDIO_REMOTE_URL=$remote_url|" .env
+                sed -i.bak "s|# LMSTUDIO_USE_REMOTE=.*|LMSTUDIO_USE_REMOTE=true|" .env
                 rm -f .env.bak
                 echo -e "${GREEN}✅ Remote endpoint configured${NC}"
+                echo -e "${YELLOW}ℹ️  CLI Panda will try remote first, fall back to local if it fails${NC}"
             fi
         fi
     elif [ -f ".env" ]; then

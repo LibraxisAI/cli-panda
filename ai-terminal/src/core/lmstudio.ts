@@ -4,8 +4,8 @@ import { EventEmitter } from 'events';
 
 export interface LMStudioConfig {
   baseUrl?: string;
-  dragonUrl?: string;
-  useDragon?: boolean;
+  remoteUrl?: string;
+  useRemote?: boolean;
   model?: string;
   temperature?: number;
   maxTokens?: number;
@@ -21,8 +21,8 @@ export class LMStudioService extends EventEmitter {
     // Load from environment variables first, then config file
     let defaultConfig = {
       baseUrl: process.env.LMSTUDIO_BASE_URL || 'ws://localhost:1234',
-      dragonUrl: process.env.LMSTUDIO_DRAGON_URL,
-      useDragon: process.env.LMSTUDIO_USE_DRAGON === 'true',
+      remoteUrl: process.env.LMSTUDIO_REMOTE_URL || process.env.LMSTUDIO_DRAGON_URL, // support old env var
+      useRemote: process.env.LMSTUDIO_USE_REMOTE === 'true' || process.env.LMSTUDIO_USE_DRAGON === 'true',
       model: process.env.LMSTUDIO_MODEL || 'qwen3-8b',
       temperature: process.env.LMSTUDIO_TEMPERATURE ? parseFloat(process.env.LMSTUDIO_TEMPERATURE) : 0.7,
       maxTokens: process.env.LMSTUDIO_MAX_TOKENS ? parseInt(process.env.LMSTUDIO_MAX_TOKENS) : 200,
@@ -38,15 +38,15 @@ export class LMStudioService extends EventEmitter {
     
     this.config = {
       baseUrl: config.baseUrl || defaultConfig.baseUrl,
-      dragonUrl: config.dragonUrl || defaultConfig.dragonUrl,
-      useDragon: config.useDragon !== undefined ? config.useDragon : defaultConfig.useDragon,
+      remoteUrl: config.remoteUrl || defaultConfig.remoteUrl,
+      useRemote: config.useRemote !== undefined ? config.useRemote : defaultConfig.useRemote,
       model: config.model || defaultConfig.model,
       temperature: config.temperature || defaultConfig.temperature,
       maxTokens: config.maxTokens || defaultConfig.maxTokens,
     };
     
-    // Try Dragon first if enabled
-    const urlToUse = this.config.useDragon ? this.config.dragonUrl : this.config.baseUrl;
+    // Try remote first if enabled and configured
+    const urlToUse = (this.config.useRemote && this.config.remoteUrl) ? this.config.remoteUrl : this.config.baseUrl;
     
     this.client = new LMStudioClient({
       baseUrl: urlToUse,
@@ -68,9 +68,9 @@ export class LMStudioService extends EventEmitter {
       
       this.emit('connected', this.model.id);
     } catch (error) {
-      // If Dragon fails and we were trying it, fallback to local
-      if (this.config.useDragon && this.client.baseUrl?.includes('libraxis.cloud')) {
-        console.log('Dragon endpoint failed, falling back to local LM Studio...');
+      // If remote fails and we were trying it, fallback to local
+      if (this.config.useRemote && this.config.remoteUrl && this.client.baseUrl !== this.config.baseUrl) {
+        console.log('Remote endpoint failed, falling back to local LM Studio...');
         this.client = new LMStudioClient({
           baseUrl: this.config.baseUrl,
         });
