@@ -92,6 +92,21 @@ ai-block
 
 ## Configuration
 
+### Environment Variables (Recommended for sensitive data)
+
+```bash
+# Copy example env file
+cp .env.example .env
+
+# Edit with your settings:
+# LMSTUDIO_BASE_URL=ws://localhost:1234
+# LMSTUDIO_DRAGON_URL=ws://your-remote-endpoint:port
+# LMSTUDIO_USE_DRAGON=true
+# LMSTUDIO_MODEL=qwen3-8b
+```
+
+### Config File
+
 Config znajduje się w `~/.config/cli-panda/config.json`:
 
 ```json
@@ -109,6 +124,21 @@ Config znajduje się w `~/.config/cli-panda/config.json`:
   }
 }
 ```
+
+### Remote Endpoint with Fallback
+
+To use a remote LM Studio endpoint (e.g., Dragon server) with automatic fallback:
+
+1. Set environment variables in `.env`:
+   ```bash
+   LMSTUDIO_DRAGON_URL=ws://your-endpoint:port
+   LMSTUDIO_USE_DRAGON=true
+   ```
+
+2. The terminal will:
+   - Try remote endpoint first
+   - Automatically fall back to local LM Studio if remote fails
+   - Show connection status in terminal
 
 ### Edycja konfiguracji
 ```bash

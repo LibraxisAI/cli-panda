@@ -18,14 +18,14 @@ export class LMStudioService extends EventEmitter {
 
   constructor(config: LMStudioConfig = {}) {
     super();
-    // Load from config file if exists
+    // Load from environment variables first, then config file
     let defaultConfig = {
-      baseUrl: 'ws://localhost:1234',
-      dragonUrl: 'ws://libraxis.cloud:51234',
-      useDragon: true,
-      model: 'qwen3-8b',
-      temperature: 0.7,
-      maxTokens: 200,
+      baseUrl: process.env.LMSTUDIO_BASE_URL || 'ws://localhost:1234',
+      dragonUrl: process.env.LMSTUDIO_DRAGON_URL,
+      useDragon: process.env.LMSTUDIO_USE_DRAGON === 'true',
+      model: process.env.LMSTUDIO_MODEL || 'qwen3-8b',
+      temperature: process.env.LMSTUDIO_TEMPERATURE ? parseFloat(process.env.LMSTUDIO_TEMPERATURE) : 0.7,
+      maxTokens: process.env.LMSTUDIO_MAX_TOKENS ? parseInt(process.env.LMSTUDIO_MAX_TOKENS) : 200,
     };
     
     try {

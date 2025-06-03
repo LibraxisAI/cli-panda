@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import 'dotenv/config';
 import blessed from 'blessed';
 import { LMStudioService } from './core/lmstudio';
 import { InlineAI } from './features/inline-ai';

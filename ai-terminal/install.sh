@@ -235,6 +235,37 @@ EOF
     fi
 }
 
+# Setup endpoint configuration
+setup_endpoints() {
+    echo -e "\n${BLUE}Setting up endpoint configuration...${NC}"
+    
+    # Create .env from .env.example if it doesn't exist
+    if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+        cp .env.example .env
+        echo -e "${GREEN}✅ Created .env file${NC}"
+        
+        # Ask if user wants to configure remote endpoint
+        echo -e "\n${YELLOW}Do you have a remote LM Studio endpoint (e.g., Dragon server)?${NC}"
+        echo -e "Press Y to configure, N to use local only: \c"
+        read -r response
+        
+        if [[ "$response" =~ ^[Yy]$ ]]; then
+            echo -e "\n${BLUE}Enter your remote endpoint URL (e.g., ws://example.com:51234):${NC} \c"
+            read -r dragon_url
+            
+            if [ ! -z "$dragon_url" ]; then
+                # Update .env file
+                sed -i.bak "s|LMSTUDIO_DRAGON_URL=.*|LMSTUDIO_DRAGON_URL=$dragon_url|" .env
+                sed -i.bak "s|LMSTUDIO_USE_DRAGON=.*|LMSTUDIO_USE_DRAGON=true|" .env
+                rm -f .env.bak
+                echo -e "${GREEN}✅ Remote endpoint configured${NC}"
+            fi
+        fi
+    elif [ -f ".env" ]; then
+        echo -e "${GREEN}✅ .env file already exists${NC}"
+    fi
+}
+
 # Create simple launcher script
 create_launcher() {
     echo -e "\n${BLUE}Creating launcher...${NC}"
@@ -295,6 +326,7 @@ main() {
     install_deps
     setup_zsh
     create_config
+    setup_endpoints
     create_launcher
     
     # Success!
