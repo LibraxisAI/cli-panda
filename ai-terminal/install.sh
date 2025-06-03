@@ -328,7 +328,7 @@ main() {
         echo -e "  • Install npm dependencies"
         echo -e "  • Setup ZSH integration in ~/.zsh/cli-panda"
         echo -e "  • Create config at ~/.config/cli-panda/config.json"
-        echo -e "  • Create launcher at ~/.local/bin/cli-panda"
+        echo -e "  • Create launcher at ~/.local/bin/ai"
         echo -e "\n${GREEN}✅ Dry-run complete (no changes made)${NC}"
         exit 0
     fi
