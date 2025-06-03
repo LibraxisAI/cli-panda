@@ -110,10 +110,23 @@ uv sync  # Python/MLX components
 
 ## 🎯 Usage Examples
 
+### Quick Setup (One Time)
+```bash
+# Set up all aliases
+./setup-aliases.sh
+source ~/.zshrc
+
+# Or use the universal launcher
+./panda help
+```
+
 ### AI Terminal
 ```bash
-# Start interactive AI terminal
+# Start interactive AI terminal (after setup)
 ai
+
+# Or using launcher from project directory
+./panda ai
 
 # Get inline help
 ?? how to find large files
@@ -131,11 +144,18 @@ wtf  # alias for ai-fix
 
 ### RAG System (LBRXCHAT)
 ```bash
-# Start the TUI interface (no activation needed!)
+# With alias (after setup)
+ai-rag
+
+# Or using launcher
+./panda rag
+
+# Or manually
 cd lbrxchat
 uv run python -m lbrxchat.tui
 
-# Or use programmatically
+# Ingest documents
+cd lbrxchat
 uv run python -m lbrxchat.ingest /path/to/documents
 uv run python -m lbrxchat.query "What does the documentation say about X?"
 ```

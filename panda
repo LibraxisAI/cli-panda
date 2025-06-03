@@ -1,0 +1,51 @@
+#!/bin/bash
+# Universal CLI Panda launcher
+
+# Colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+# Find CLI Panda directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Check what user wants to run
+case "${1:-ai}" in
+  "ai"|"terminal")
+    echo -e "${BLUE}🐼 Launching AI Terminal...${NC}"
+    cd "$SCRIPT_DIR/ai-terminal" && npm start
+    ;;
+    
+  "rag"|"chat")
+    echo -e "${BLUE}🐼 Launching LBRXCHAT RAG System...${NC}"
+    cd "$SCRIPT_DIR/lbrxchat" && uv run python -m lbrxchat.tui
+    ;;
+    
+  "py"|"python")
+    echo -e "${BLUE}🐼 Launching Python CLI Panda...${NC}"
+    cd "$SCRIPT_DIR/cli" && uv run python cli_panda.py "${@:2}"
+    ;;
+    
+  "help"|"-h"|"--help")
+    echo -e "${GREEN}CLI Panda Launcher 🐼${NC}"
+    echo
+    echo "Usage: ./panda [component]"
+    echo
+    echo "Components:"
+    echo "  ai, terminal  - Launch AI Terminal (default)"
+    echo "  rag, chat     - Launch LBRXCHAT RAG system"
+    echo "  py, python    - Launch Python CLI version"
+    echo
+    echo "Examples:"
+    echo "  ./panda              # Launch AI Terminal"
+    echo "  ./panda rag          # Launch RAG chat"
+    echo "  ./panda py --help    # Python CLI help"
+    ;;
+    
+  *)
+    echo -e "${YELLOW}Unknown component: $1${NC}"
+    echo "Use './panda help' for available options"
+    exit 1
+    ;;
+esac
