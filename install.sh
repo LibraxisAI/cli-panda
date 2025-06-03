@@ -26,7 +26,7 @@ else
 fi
 
 # Configuration
-REPO_URL="https://github.com/m-szymanska/cli-panda.git"
+REPO_URL="https://github.com/LibraxisAI/cli-panda.git"
 INSTALL_DIR="$HOME/cli-panda"
 
 # ASCII Art
