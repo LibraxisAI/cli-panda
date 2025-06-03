@@ -17,12 +17,7 @@ pub mod core {
 
 // Export MLX related modules
 pub mod mlx {
-    pub mod models {
-        // Indicates that MLXModelManager is available through FFI as an external type
-        extern "Rust" {
-            pub type MLXModelManager;
-        }
-    }
+    pub mod models;
     pub mod embedding;
     pub mod inference;
 }
