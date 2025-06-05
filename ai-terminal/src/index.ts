@@ -225,10 +225,16 @@ class AITerminal {
   }
 }
 
-// Start the application
-const terminal = new AITerminal();
-terminal.start();
+// Export for CLI usage
+export { AITerminal };
 
-// Handle process termination
-process.on('SIGTERM', () => process.exit(0));
-process.on('SIGINT', () => process.exit(0));
+// Only start if run directly (not imported)
+if (require.main === module) {
+  // Start the application
+  const terminal = new AITerminal();
+  terminal.start();
+
+  // Handle process termination
+  process.on('SIGTERM', () => process.exit(0));
+  process.on('SIGINT', () => process.exit(0));
+}

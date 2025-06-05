@@ -266,10 +266,33 @@ class ChatApp(App):
 
 
 # === Main Entry Point ===
+def _disable_mouse_reporting() -> None:
+    """Ensure terminal mouse reporting is disabled.
+
+    When Textual (or Rich) enables SGR mouse mode it sends the escape
+    sequences `\x1b[?1000h`, `\x1b[?1003h`, `\x1b[?1015h`, and
+    `\x1b[?1006h`.  They *should* be reverted automatically on clean
+    shutdown, but if the user aborts the application with Ctrl-C the cleanup
+    can be skipped, leaving the terminal in mouse-tracking mode.  We always
+    send the complementary *disable* codes on exit so the prompt is restored
+    to a sane state regardless of how the program terminates.
+    """
+
+    # Disable X10, button-event, UTF-8 and SGR mouse modes respectively.
+    sys.stdout.write("\x1b[?1000l\x1b[?1003l\x1b[?1015l\x1b[?1006l")
+    sys.stdout.flush()
+
+
 def main():
     """Run the LBRXCHAT TUI application"""
-    app = ChatApp()
-    app.run()
+    try:
+        app = ChatApp()
+        app.run()
+    except KeyboardInterrupt:
+        # Gracefully handle Ctrl-C so we can still restore terminal state.
+        pass
+    finally:
+        _disable_mouse_reporting()
 
 
 if __name__ == "__main__":

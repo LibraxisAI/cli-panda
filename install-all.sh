@@ -108,8 +108,9 @@ install_homebrew() {
 install_dependencies() {
     echo -e "\n${BLUE}Installing system dependencies...${NC}"
     
-    # Update Homebrew
-    brew update
+    # Update Homebrew (skip if it takes too long)
+    echo "Updating Homebrew (timeout 30s)..."
+    timeout 30 brew update || warning "Homebrew update skipped (timeout)"
     
     # Install Git
     if ! command_exists git; then
@@ -394,7 +395,19 @@ main() {
     check_lm_studio
     
     # Done!
-    show_final_instructions
+    echo "All components installed successfully!"
+    echo ""
+    echo "🎉 CLI Panda Installation Complete! 🐼"
+    echo ""
+    echo "Running final test to get your next steps..."
+    echo ""
+    
+    # Run the test script which will ask LM Studio for instructions
+    if command_exists uv; then
+        uv run python test_all.py
+    else
+        echo "Please run: ./run.sh test"
+    fi
 }
 
 # Run main function

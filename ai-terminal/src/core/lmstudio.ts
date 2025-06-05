@@ -51,10 +51,36 @@ export class LMStudioService extends EventEmitter {
     this.client = new LMStudioClient({
       baseUrl: urlToUse,
     });
+    
+    // Some SDK versions might initialize model API asynchronously
+    // Give it a moment to initialize
+    if (!this.client.model) {
+      // Wait a bit for initialization
+      setTimeout(() => {
+        if (!this.client.model) {
+          console.warn('LMStudioClient model API not available after initialization');
+        }
+      }, 100);
+    }
   }
 
   async connect(): Promise<void> {
     try {
+      // Check if client is properly initialized
+      if (!this.client) {
+        throw new Error('LMStudioClient not initialized');
+      }
+      
+      // Give client a moment to initialize if needed
+      if (!this.client.model) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      // Check if model API is available
+      if (!this.client.model) {
+        throw new Error('LMStudioClient model API not available - check that LM Studio is running on ' + this.client.baseUrl);
+      }
+      
       // LMStudioClient doesn't need explicit connect
       const models = await this.client.model.list();
       
@@ -76,6 +102,11 @@ export class LMStudioService extends EventEmitter {
         });
         
         try {
+          // Check if model API is available after fallback
+          if (!this.client.model) {
+            throw new Error('LMStudioClient model API not available on local fallback');
+          }
+          
           const models = await this.client.model.list();
           const preferredModel = models.find(m => m.id.includes(this.config.model!));
           this.model = preferredModel || models[0];
@@ -163,7 +194,9 @@ export class LMStudioService extends EventEmitter {
   }
 
   disconnect(): void {
-    this.client.disconnect();
+    if (this.client && typeof this.client.disconnect === 'function') {
+      this.client.disconnect();
+    }
     this.emit('disconnected');
   }
 }

@@ -1,0 +1,117 @@
+/* LBRXCHAT TUI Styles */
+
+/* Main container */
+#app-grid {
+    layout: grid;
+    grid-size: 3 1;
+    height: 100%;
+}
+
+/* Left panel (settings) */
+#left-panel {
+    padding: 1 2;
+    border: solid $secondary;
+    width: 35;
+}
+
+#left-panel Label {
+    text-style: bold;
+    margin: 1 0;
+    color: $primary;
+}
+
+#left-panel Button {
+    width: 100%;
+    margin: 1 0;
+}
+
+#left-panel Select {
+    width: 100%;
+    margin: 1 0;
+}
+
+/* System info */
+#system-info {
+    margin: 1 0;
+    padding: 1;
+    border: solid $secondary;
+    height: auto;
+}
+
+/* Progress indicators */
+#progress-label {
+    color: $success;
+    margin-top: 2;
+}
+
+#progress-bar {
+    color: $warning;
+}
+
+/* Right panel (chat) */
+#right-panel {
+    padding: 1 2;
+    column-span: 2;
+}
+
+/* Chat log */
+#chat-log {
+    height: 1fr;
+    border: solid $secondary;
+    padding: 1;
+    scrollbar-background: $surface;
+    scrollbar-color: $primary;
+    scrollbar-size: 1 1;
+}
+
+/* Input container */
+#input-container {
+    layout: horizontal;
+    height: 3;
+    margin-top: 1;
+}
+
+#query-input {
+    width: 1fr;
+}
+
+#send-btn {
+    margin-left: 1;
+}
+
+/* Headers */
+#models-header, #system-info-header {
+    background: $primary;
+    color: $text;
+    padding: 0 1;
+    text-align: center;
+}
+
+/*
+Responsive adjustments for narrow terminals would normally be done via a
+Textual `@media` rule, e.g.:
+
+    @media (width <= 100) { … }
+
+However, the version pinned in pyproject (Textual 0.53) predates media-query
+support, which causes a StylesheetError at runtime.  The block has therefore
+been removed to keep the application working with the current dependency set.
+Feel free to re-enable it after upgrading Textual to ≥0.57.
+*/
+
+/* Theme overrides */
+Button {
+    background: $primary;
+}
+
+Button:hover {
+    background: $secondary;
+}
+
+Input {
+    background: $surface;
+}
+
+Select {
+    background: $surface;
+}

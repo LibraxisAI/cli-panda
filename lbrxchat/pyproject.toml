@@ -54,6 +54,20 @@ dev = [
 [tool.setuptools]
 packages = ["lbrxchat"]
 
+# Include non-Python assets (e.g. CSS) that are required at runtime.
+# Without this, the generated wheel omits the stylesheet which causes a
+# Textual `StylesheetError` at start-up when the application attempts to
+# read ``lbrxchat/ui/styles.css`` from the installed location.
+[tool.setuptools.package-data]
+"lbrxchat.ui" = ["*.css"]
+
+[project.scripts]
+# Convenience entry points so the application can be started via
+# ``uv run lbrxchat.ui.tui`` or simply ``lbrxchat-tui`` once installed.
+# Both point to the same ``main`` function.
+lbrxchat-tui = "lbrxchat.ui.tui:main"
+lbrxchat = "lbrxchat.__main__:main"
+
 [tool.black]
 line-length = 100
 target-version = ["py310", "py311", "py312"]

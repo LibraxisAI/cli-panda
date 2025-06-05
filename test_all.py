@@ -270,7 +270,7 @@ async def test_lm_studio_chat():
             payload = {
                 "model": "qwen3-8b",
                 "messages": [
-                    {"role": "user", "content": "Describe CLI Panda project in Polish, enthusiastically, in 2 sentences. End with 'No i zajebiście! 🐼'"}
+                    {"role": "user", "content": "You just installed CLI Panda! Tell the user what to do next in 3-5 practical steps. Be enthusiastic and friendly. Include: 1) Try 'ai' command, 2) Use ?? for inline help, 3) Explore 'ai rag' for documents. End with an emoji!"}
                 ],
                 "stream": True
             }

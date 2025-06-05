@@ -45,24 +45,43 @@ class SDKProvider extends EventEmitter implements LMProvider {
   }
 
   async connect(): Promise<void> {
-    await this.client.connect();
-    const models = await this.client.model.list();
-    
-    const preferredModel = models.find(m => m.id.includes(this.config.model || 'qwen3-8b'));
-    this.model = preferredModel || models[0];
-    
-    if (!this.model) {
-      throw new Error('No models available in LM Studio');
+    try {
+      // Some versions of LMStudioClient may need explicit connection
+      if (this.client.connect) {
+        await this.client.connect();
+      }
+      
+      // Check if model API is available
+      if (!this.client.model) {
+        throw new Error('LMStudioClient model API not available - check LM Studio is running');
+      }
+      
+      const models = await this.client.model.list();
+      
+      const preferredModel = models.find(m => m.id.includes(this.config.model || 'qwen3-8b'));
+      this.model = preferredModel || models[0];
+      
+      if (!this.model) {
+        throw new Error('No models available in LM Studio');
+      }
+      
+      this.emit('connected', this.model.id);
+    } catch (error) {
+      this.emit('error', error);
+      throw error;
     }
-    
-    this.emit('connected', this.model.id);
   }
 
   disconnect(): void {
-    this.client.disconnect();
+    if (this.client && typeof this.client.disconnect === 'function') {
+      this.client.disconnect();
+    }
   }
 
   async listModels(): Promise<Model[]> {
+    if (!this.client.model) {
+      throw new Error('Model API not available');
+    }
     const models = await this.client.model.list();
     return models.map(m => ({
       id: m.id,

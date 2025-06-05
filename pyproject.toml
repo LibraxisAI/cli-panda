@@ -127,5 +127,8 @@ precision = 2
 show_missing = true
 skip_covered = false
 
+[tool.uv.workspace]
+members = ["cli"]
+
 # UV specific configuration - removed for now
 # [tool.uv] settings not needed in current version
