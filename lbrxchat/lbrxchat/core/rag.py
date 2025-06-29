@@ -8,23 +8,27 @@ LBRXCHAT RAG System
 Retrieval-Augmented Generation (RAG) implementation for LBRXCHAT.
 """
 
-import os
 import json
-import threading
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Callable
+from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 import requests
+
+from lbrxchat.core.config import (
+    CHAT_TEMPERATURE,
+    CORPUS_PATH,
+    DEFAULT_EMBEDDING_MODEL,
+    DEFAULT_LLM_MODEL,
+    DEFAULT_TOP_K,
+    EMBEDDING_DIMENSION,
+    INDEX_FILE,
+    INDEX_PATH,
+    LMSTUDIO_HOST,
+    SYSTEM_PROMPTS,
+)
 
 # Local imports
 from lbrxchat.core.models import MLXModelManager
-from lbrxchat.core.config import (
-    CORPUS_PATH, INDEX_PATH, INDEX_FILE, DEFAULT_LLM_MODEL, 
-    DEFAULT_EMBEDDING_MODEL, SYSTEM_PROMPTS, LMSTUDIO_HOST,
-    DEFAULT_TOP_K, EMBEDDING_DIMENSION, CHAT_TEMPERATURE
-)
 
 
 class VetRAGSystem:
@@ -108,7 +112,7 @@ class VetRAGSystem:
             callback("Saving index...", 0.8)
         
         index_data = []
-        for i, (doc, embedding, text) in enumerate(zip(documents, embeddings, texts)):
+        for i, (doc, embedding, text) in enumerate(zip(documents, embeddings, texts, strict=False)):
             metadata = {}
             
             # Extract metadata from document

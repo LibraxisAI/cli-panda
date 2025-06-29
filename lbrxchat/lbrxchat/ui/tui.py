@@ -8,36 +8,24 @@ LBRXCHAT TUI Interface
 A sophisticated TUI-based interface for LBRXCHAT, powered by Textual.
 """
 
-import os
-import sys
-import json
-import time
-import asyncio
 import threading
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union, Callable
+import time
 
 from rich.markdown import Markdown
 from rich.panel import Panel
-from rich.text import Text
 from rich.table import Table
+from rich.text import Text
 from textual.app import App, ComposeResult
-from textual.containers import Container
-from textual.widgets import (
-    Header, Footer, Button, Static, Input, Label,
-    Select, RichLog
-)
-from textual.reactive import reactive
 from textual.binding import Binding
+from textual.containers import Container
+from textual.widgets import Button, Footer, Header, Input, Label, RichLog, Select, Static
+
+from lbrxchat.core.config import DEFAULT_LLM_MODEL, INDEX_FILE, PROJECT_ROOT
 
 # Import core components
 from lbrxchat.core.models import MLXModelManager
 from lbrxchat.core.rag import VetRAGSystem
-from lbrxchat.core.config import (
-    PROJECT_ROOT, INDEX_PATH, INDEX_FILE, 
-    DEFAULT_LLM_MODEL, SYSTEM_PROMPTS
-)
+
 
 # === TUI Application ===
 class ChatApp(App):

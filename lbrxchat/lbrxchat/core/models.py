@@ -9,15 +9,15 @@ Model management system for LBRXCHAT - handles loading/unloading of LLM models,
 JIT management with TTL, and LM Studio integration.
 """
 
-import os
-import time
 import threading
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union, Callable
+from typing import Any, Dict, List, Optional
 
 # LM Studio integration
 import requests
+
 try:
     from lmstudio import Client as LMStudioClient
     LMSTUDIO_NATIVE_API = True
@@ -25,10 +25,7 @@ except ImportError:
     LMSTUDIO_NATIVE_API = False
 
 # Local imports
-from lbrxchat.core.config import (
-    MLX_MODELS_PATH, MODEL_TTL, DEFAULT_LLM_MODEL,
-    LMSTUDIO_HOST, LMSTUDIO_API_KEY
-)
+from lbrxchat.core.config import DEFAULT_LLM_MODEL, LMSTUDIO_HOST, MLX_MODELS_PATH, MODEL_TTL
 
 
 class MLXModelManager:

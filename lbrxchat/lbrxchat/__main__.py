@@ -8,15 +8,12 @@ LBRXCHAT Main Entry Point
 This module provides the main entry point for the LBRXCHAT application.
 """
 
-import sys
-import os
 import argparse
+import os
 from pathlib import Path
 
+from lbrxchat.core.config import CORPUS_PATH, DEFAULT_LLM_MODEL, INDEX_PATH
 from lbrxchat.ui.tui import main as tui_main
-from lbrxchat.core.config import (
-    CORPUS_PATH, INDEX_PATH, INDEX_FILE, DEFAULT_LLM_MODEL
-)
 
 
 def main():

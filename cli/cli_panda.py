@@ -12,16 +12,15 @@ Future integrations:
 Pandzia will be your truly intelligent terminal assistant! 🐼
 """
 
-import sys
-import os
-import locale
-import asyncio
-import aiohttp
-import json
-from typing import Optional, List
 import argparse
-from datetime import datetime
+import asyncio
+import json
+import locale
+import os
 import re
+import sys
+
+import aiohttp
 
 # Ustaw locale na UTF-8
 try:
@@ -39,7 +38,7 @@ class Colors:
     DIM = '\033[2m'
     ITALIC = '\033[3m'
     UNDERLINE = '\033[4m'
-    
+
     # Kolory
     BLACK = '\033[30m'
     RED = '\033[31m'
@@ -50,7 +49,7 @@ class Colors:
     CYAN = '\033[36m'
     WHITE = '\033[37m'
     GRAY = '\033[90m'
-    
+
     # Tła
     BG_BLACK = '\033[40m'
     BG_RED = '\033[41m'
@@ -70,66 +69,66 @@ class TerminalAI:
         self.context_file = os.path.expanduser("~/.ai_context.json")
         self.max_context_size = 1000  # Praktycznie bez limitu - 40k okno kontekstowe!
         self.initialized = False
-        
+
         # MCP Memory Server integration (future)
         self.memory_enabled = False  # TODO: Enable when MCP server is running
         self.memory_server_url = "http://localhost:3001"  # Default MCP port
-        
+
     def format_markdown(self, text: str) -> str:
         """Format markdown-like text with colors"""
         # Bold text
         text = re.sub(r'\*\*(.*?)\*\*', f'{Colors.BOLD}\\1{Colors.RESET}', text)
-        
-        # Italic text  
+
+        # Italic text
         text = re.sub(r'\*(.*?)\*', f'{Colors.ITALIC}\\1{Colors.RESET}', text)
-        
+
         # Code blocks (should come before inline code)
         text = re.sub(r'```(.*?)```', f'{Colors.CYAN}```{Colors.RESET}{Colors.BG_BLACK}{Colors.GREEN}\\1{Colors.RESET}{Colors.CYAN}```{Colors.RESET}', text, flags=re.DOTALL)
-        
+
         # Inline code
         text = re.sub(r'`(.*?)`', f'{Colors.YELLOW}`{Colors.RESET}{Colors.BG_BLACK}{Colors.CYAN}\\1{Colors.RESET}{Colors.YELLOW}`{Colors.RESET}', text)
-        
+
         # Headers
         text = re.sub(r'^# (.*?)$', f'{Colors.BOLD}{Colors.CYAN}# \\1{Colors.RESET}', text, flags=re.MULTILINE)
         text = re.sub(r'^## (.*?)$', f'{Colors.BOLD}{Colors.BLUE}## \\1{Colors.RESET}', text, flags=re.MULTILINE)
         text = re.sub(r'^### (.*?)$', f'{Colors.BOLD}{Colors.MAGENTA}### \\1{Colors.RESET}', text, flags=re.MULTILINE)
-        
+
         # Lists
         text = re.sub(r'^- (.*?)$', f'{Colors.YELLOW}•{Colors.RESET} \\1', text, flags=re.MULTILINE)
         text = re.sub(r'^\* (.*?)$', f'{Colors.YELLOW}•{Colors.RESET} \\1', text, flags=re.MULTILINE)
         text = re.sub(r'^\d+\. (.*?)$', f'{Colors.YELLOW}\\g<0>{Colors.RESET}', text, flags=re.MULTILINE)
-        
+
         return text
-        
+
     def format_thinking(self, text: str) -> str:
         """Format thinking blocks with gray color"""
         # Format thinking tags and content
         text = re.sub(
-            r'<thinking>(.*?)</thinking>', 
-            f'{Colors.GRAY}{Colors.DIM}<thinking>\\1</thinking>{Colors.RESET}', 
-            text, 
+            r'<thinking>(.*?)</thinking>',
+            f'{Colors.GRAY}{Colors.DIM}<thinking>\\1</thinking>{Colors.RESET}',
+            text,
             flags=re.DOTALL
         )
         return text
-        
+
     async def initialize(self):
         """Initialize HTTP session"""
         if self.initialized and self.session:
             return
-        
+
         print("🤖 Inicjalizuję AI Terminal Helper...")
         self.session = aiohttp.ClientSession()
         self.initialized = True
-        
+
         # Check if LM Studio is running
         try:
             async with self.session.get(f"{self.base_url}/models") as resp:
                 if resp.status == 200:
                     models = await resp.json()
                     available_models = models['data']
-                    
-                    print(f"✅ Połączono z LM Studio")
-                    
+
+                    print("✅ Połączono z LM Studio")
+
                     # Automatycznie wybierz pierwszy model jeśli nie podano
                     if self.model_id == "auto" or not self.model_id:
                         if available_models:
@@ -147,7 +146,7 @@ class TerminalAI:
                             for model_id in model_ids:
                                 print(f"   - {model_id}")
                             sys.exit(1)
-                        
+
                     print(f"📦 Używam modelu: {self.model_id}")
                 else:
                     print("❌ LM Studio nie odpowiada. Uruchom serwer: lmstudio server start")
@@ -156,14 +155,14 @@ class TerminalAI:
             print(f"❌ Nie mogę połączyć się z LM Studio: {e}")
             print("   Uruchom serwer: lmstudio server start")
             sys.exit(1)
-        
+
     async def get_response_stream(self, prompt: str, context: str = ""):
         """Get AI response with streaming for reasoning display"""
         if not self.session:
             await self.initialize()
-            
+
         # Build the full prompt with system message
-        system_prompt = """Jesteś Pandzią 🐼 - inteligentnym asystentem terminalowym, który działa LOKALNIE na komputerze użytkownika poprzez LM Studio. 
+        system_prompt = """Jesteś Pandzią 🐼 - inteligentnym asystentem terminalowym, który działa LOKALNIE na komputerze użytkownika poprzez LM Studio.
 
 WAŻNE INFORMACJE O TOBIE:
 - Działasz LOKALNIE na komputerze użytkownika, NIE w chmurze
@@ -191,22 +190,22 @@ Tu opisz krok po kroku swój proces myślowy
 </thinking>
 
 Pamiętaj: mieszkasz w terminalu użytkownika, nie w internecie!"""
-        
+
         messages = [
             {"role": "system", "content": system_prompt}
         ]
-        
+
         if context:
             messages.append({"role": "user", "content": context})
-        
+
         messages.append({"role": "user", "content": prompt})
-        
+
         try:
             headers = {
                 'Content-Type': 'application/json; charset=utf-8',
                 'Accept': 'text/event-stream'
             }
-            
+
             async with self.session.post(
                 f"{self.base_url}/chat/completions",
                 json={
@@ -221,31 +220,30 @@ Pamiętaj: mieszkasz w terminalu użytkownika, nie w internecie!"""
                 if resp.status == 200:
                     full_response = ""
                     in_thinking = False
-                    thinking_content = ""
                     first_content = True
-                    
+
                     # Create colors instance
                     colors = Colors()
-                    
+
                     async for line in resp.content:
                         line = line.decode('utf-8').strip()
                         if line.startswith('data: '):
                             data = line[6:]
                             if data == '[DONE]':
                                 break
-                                
+
                             try:
                                 chunk = json.loads(data)
                                 if 'choices' in chunk and chunk['choices']:
                                     content = chunk['choices'][0].get('delta', {}).get('content', '')
                                     if content:
                                         full_response += content
-                                        
-                                        # Clear thinking line on first content  
+
+                                        # Clear thinking line on first content
                                         if first_content:
                                             print("\r\033[K", end='', flush=True)
                                             first_content = False
-                                        
+
                                         # Wykryj początek myślenia
                                         if '<thinking>' in content:
                                             in_thinking = True
@@ -255,13 +253,13 @@ Pamiętaj: mieszkasz w terminalu użytkownika, nie w internecie!"""
                                             if thinking_text:
                                                 print(f"{colors.GRAY}{colors.DIM}{thinking_text}{colors.RESET}", end='', flush=True)
                                             continue
-                                        
+
                                         # Wykryj koniec myślenia
                                         if '</thinking>' in content:
                                             in_thinking = False
                                             thinking_part = content.split('</thinking>')[0]
                                             final_part = content.split('</thinking>')[1]
-                                            
+
                                             if thinking_part:
                                                 print(f"{colors.GRAY}{colors.DIM}{thinking_part}</thinking>{colors.RESET}", end='', flush=True)
                                             else:
@@ -270,7 +268,7 @@ Pamiętaj: mieszkasz w terminalu użytkownika, nie w internecie!"""
                                             if final_part:
                                                 print(final_part, end='', flush=True)
                                             continue
-                                        
+
                                         # Normal content display
                                         if in_thinking:
                                             print(f"{colors.GRAY}{colors.DIM}{content}{colors.RESET}", end='', flush=True)
@@ -278,7 +276,7 @@ Pamiętaj: mieszkasz w terminalu użytkownika, nie w internecie!"""
                                             print(content, end='', flush=True)
                             except:
                                 pass
-                    
+
                     print()  # Nowa linia na końcu
                     return full_response
                 else:
@@ -286,14 +284,14 @@ Pamiętaj: mieszkasz w terminalu użytkownika, nie w internecie!"""
                     return f"Błąd API {resp.status}: {error_text}"
         except Exception as e:
             return f"Błąd: {str(e)}"
-    
+
     async def get_response(self, prompt: str, context: str = "") -> str:
         """Get AI response for the given prompt"""
         if not self.session:
             await self.initialize()
-            
+
         # Build the full prompt with system message
-        system_prompt = """Jesteś Pandzią 🐼 - inteligentnym asystentem terminalowym, który działa LOKALNIE na komputerze użytkownika poprzez LM Studio. 
+        system_prompt = """Jesteś Pandzią 🐼 - inteligentnym asystentem terminalowym, który działa LOKALNIE na komputerze użytkownika poprzez LM Studio.
 
 WAŻNE INFORMACJE O TOBIE:
 - Działasz LOKALNIE na komputerze użytkownika, NIE w chmurze
@@ -321,24 +319,24 @@ Tu opisz krok po kroku swój proces myślowy
 </thinking>
 
 Pamiętaj: mieszkasz w terminalu użytkownika, nie w internecie!"""
-        
+
         messages = [
             {"role": "system", "content": system_prompt}
         ]
-        
+
         if context:
             # Add context from previous messages
             messages.append({"role": "user", "content": context})
-        
+
         messages.append({"role": "user", "content": prompt})
-        
+
         # Make API request
         try:
             headers = {
                 'Content-Type': 'application/json; charset=utf-8',
                 'Accept': 'application/json'
             }
-            
+
             async with self.session.post(
                 f"{self.base_url}/chat/completions",
                 json={
@@ -363,7 +361,7 @@ Pamiętaj: mieszkasz w terminalu użytkownika, nie w internecie!"""
             return f"Błąd połączenia: {str(e)}"
         except Exception as e:
             return f"Błąd: {str(e)}"
-    
+
     def show_help(self):
         """Display help instructions"""
         help_text = """
@@ -375,137 +373,137 @@ KOMENDY CZATU:
   HELP      → Wyświetl tę instrukcję
   exit      → Wyjdź z czatu
   clear     → Wyczyść kontekst rozmowy
-  
+
 KOMENDY MODELI:
   ai model --list    → Lista dostępnych modeli
   ai model --status  → Sprawdź załadowane modele
   ai model --load <nazwa>   → Załaduj model
   ai model --unload <nazwa> → Wyładuj model
-  
+
 JAK UŻYWAĆ:
   • Wpisz pytanie i naciśnij Enter
   • AI pamięta WSZYSTKO! (40k okno kontekstowe + KV-cache)
   • Możesz pytać o komendy, błędy, programowanie
   • Złożone pytania pokazują tok myślenia 🧠
-  
+
 PRZYKŁADY:
   🐼 ~% jak znaleźć pliki większe niż 100MB?
   🐼 ~% wyjaśnij mi git rebase
   🐼 ~% napisz skrypt do backupu
-  
+
 SKRÓTY W TERMINALU:
   ai        → Uruchom czat
   ask ".."  → Szybkie pytanie
   wtf       → Wyjaśnij ostatni błąd
   explain   → Wyjaśnij output komendy
-  
+
 SERWER: LM Studio (localhost:1234)
 MODEL: Automatyczny wybór (auto)
 PAMIĘĆ: Unlimited context + future MCP/ChromaDB
 ═══════════════════════════════════════════════════════════
         """
         print(help_text)
-        
-    def load_context(self) -> List[str]:
+
+    def load_context(self) -> list[str]:
         """Load context from file"""
         try:
             if os.path.exists(self.context_file):
-                with open(self.context_file, 'r') as f:
+                with open(self.context_file) as f:
                     return json.load(f)
         except:
             pass
         return []
-    
-    def save_context(self, context: List[str]):
+
+    def save_context(self, context: list[str]):
         """Save context to file"""
         try:
             # Ogranicz rozmiar kontekstu
             if len(context) > self.max_context_size * 2:
                 context = context[-self.max_context_size * 2:]
-            
+
             with open(self.context_file, 'w') as f:
                 json.dump(context, f, ensure_ascii=False, indent=2)
         except:
             pass
-            
+
     async def chat_mode(self):
         """Interactive chat mode"""
         print("\n🐼 AI Terminal Assistant")
         print("Wpisz HELP żeby zobaczyć instrukcję")
         print("-" * 40)
-        
+
         context = self.load_context()
         if context:
             print(f"📚 Wczytano kontekst: {len(context)} wiadomości")
-        
+
         while True:
             try:
                 user_input = input("\n🐼 ~% ").strip()
-                
+
                 if user_input == 'HELP':
                     self.show_help()
                     continue
-                
+
                 if user_input.lower() in ['exit', 'quit']:
                     print("👋 Do zobaczenia!")
                     break
-                    
+
                 if user_input.lower() == 'clear':
                     context = []
                     self.save_context([])
                     print("🗑️  Kontekst wyczyszczony")
                     continue
-                    
+
                 if not user_input:
                     continue
-                
+
                 # Add to context
                 context.append(f"User: {user_input}")
-                
+
                 # Get response
                 print("🐼💭 Panda myśli...")
                 response = await self.get_response_stream(
-                    user_input, 
+                    user_input,
                     "\n".join(context[:-1])  # Przekaż kontekst bez ostatniego wpisu
                 )
-                
+
                 # Add response to context
                 context.append(f"Assistant: {response}")
-                
+
                 # Zapisz kontekst po każdej wymianie
                 self.save_context(context)
-                
+
             except KeyboardInterrupt:
                 print("\n\n👋 Do zobaczenia!")
                 self.save_context(context)
                 break
             except Exception as e:
                 print(f"\n❌ Błąd: {e}")
-                
+
     async def command_mode(self, command: str):
         """Single command mode"""
         try:
             print("🐼💭 Panda myśli...")
-            response = await self.get_response_stream(command)
+            await self.get_response_stream(command)
         except Exception as e:
             print(f"❌ Błąd: {e}")
-            
+
     async def explain_last_error(self):
         """Explain the last command error"""
         # Get last command from history
         last_cmd = os.popen('tail -n 2 ~/.zsh_history | head -n 1').read().strip()
         last_cmd = last_cmd.split(';')[-1] if ';' in last_cmd else last_cmd
-        
+
         prompt = f"Wyjaśnij ten błąd terminala i zasugeruj jak go naprawić:\nKomenda: {last_cmd}"
-        
+
         try:
             print(f"🔍 Ostatnia komenda: {last_cmd}")
             print("🐼💭 Panda analizuje błąd...")
-            response = await self.get_response_stream(prompt)
+            await self.get_response_stream(prompt)
         except Exception as e:
             print(f"❌ Błąd: {e}")
-            
-    
+
+
     async def cleanup(self):
         """Clean up resources"""
         if self.session:
@@ -515,7 +513,7 @@ PAMIĘĆ: Unlimited context + future MCP/ChromaDB
 async def model_operations(url: str, operation: str, model_name: str = None):
     """Handle model operations: list, load, unload, status"""
     session = aiohttp.ClientSession()
-    
+
     try:
         if operation == "list":
             async with session.get(f"{url}/models") as resp:
@@ -526,7 +524,7 @@ async def model_operations(url: str, operation: str, model_name: str = None):
                         print(f"   - {model['id']}")
                 else:
                     print(f"❌ Błąd: {resp.status}")
-                    
+
         elif operation == "status":
             async with session.get(f"{url}/models") as resp:
                 if resp.status == 200:
@@ -539,12 +537,12 @@ async def model_operations(url: str, operation: str, model_name: str = None):
                         print("   Brak załadowanych modeli")
                 else:
                     print(f"❌ Błąd: {resp.status}")
-                    
+
         elif operation == "load":
             if not model_name:
                 print("❌ Podaj nazwę modelu: ai model -load <nazwa>")
                 return
-                
+
             print(f"📦 Ładowanie modelu: {model_name}")
             async with session.post(
                 f"{url}/models/load",
@@ -555,12 +553,12 @@ async def model_operations(url: str, operation: str, model_name: str = None):
                 else:
                     error = await resp.text()
                     print(f"❌ Błąd ładowania: {error}")
-                    
+
         elif operation == "unload":
             if not model_name:
                 print("❌ Podaj nazwę modelu: ai model -unload <nazwa>")
                 return
-                
+
             print(f"📤 Wyładowywanie modelu: {model_name}")
             async with session.post(
                 f"{url}/models/unload",
@@ -571,34 +569,34 @@ async def model_operations(url: str, operation: str, model_name: str = None):
                 else:
                     error = await resp.text()
                     print(f"❌ Błąd wyładowywania: {error}")
-                    
+
     finally:
         await session.close()
 
 async def main():
     parser = argparse.ArgumentParser(description="AI Terminal Helper")
-    
+
     # Dodaj subparsery
     subparsers = parser.add_subparsers(dest='mode', help='Tryb działania')
-    
+
     # Polecenie model
     model_parser = subparsers.add_parser('model', help='Zarządzanie modelami')
     model_parser.add_argument('--list', action='store_true', help='Lista modeli')
     model_parser.add_argument('--status', action='store_true', help='Status modeli')
     model_parser.add_argument('--load', metavar='NAME', help='Załaduj model')
     model_parser.add_argument('--unload', metavar='NAME', help='Wyładuj model')
-    
+
     # Domyślne argumenty
     parser.add_argument("command", nargs="?", help="Command or question for AI")
     parser.add_argument("--chat", action="store_true", help="Start interactive chat mode")
     parser.add_argument("--explain-error", action="store_true", help="Explain last command error")
-    parser.add_argument("--url", help="LM Studio API URL", 
+    parser.add_argument("--url", help="LM Studio API URL",
                        default="http://localhost:1234/v1")
-    parser.add_argument("--model", help="Model ID (lub 'auto' dla automatycznego wyboru)", 
+    parser.add_argument("--model", help="Model ID (lub 'auto' dla automatycznego wyboru)",
                        default=os.environ.get('AI_MODEL_ID', 'auto'))
-    
+
     args = parser.parse_args()
-    
+
     # Obsługa poleceń model
     if args.mode == 'model':
         if args.list:
@@ -612,10 +610,10 @@ async def main():
         else:
             print("Użyj: ai model --list | --status | --load <nazwa> | --unload <nazwa>")
         return
-    
+
     # Initialize AI helper
     ai = TerminalAI(args.url, args.model)
-    
+
     try:
         if args.chat:
             await ai.chat_mode()

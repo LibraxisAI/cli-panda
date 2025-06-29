@@ -8,15 +8,16 @@ LBRXCHAT Index Builder
 A tool for building vector indices from document corpora for LBRXCHAT.
 """
 
+import argparse
 import os
 import sys
-import argparse
 from pathlib import Path
+
 from tqdm import tqdm
 
+from lbrxchat.core.config import CORPUS_PATH, INDEX_PATH
 from lbrxchat.core.models import MLXModelManager
 from lbrxchat.core.rag import VetRAGSystem
-from lbrxchat.core.config import CORPUS_PATH, INDEX_PATH
 
 
 def main():

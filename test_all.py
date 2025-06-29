@@ -4,14 +4,13 @@ CLI Panda Complete System Test
 Tests all components and dependencies
 """
 
-import sys
-import subprocess
-import json
 import asyncio
-import aiohttp
+import json
+import subprocess
 from pathlib import Path
-import shutil
-from typing import Dict, List, Tuple
+
+import aiohttp
+
 
 # Colors for output
 class Colors:
@@ -42,13 +41,13 @@ def print_error(msg: str):
 def print_warning(msg: str):
     print(f"{Colors.YELLOW}⚠️  {msg}{Colors.END}")
 
-def run_command(cmd: List[str], cwd: str = None) -> Tuple[bool, str]:
+def run_command(cmd: list[str], cwd: str = None) -> tuple[bool, str]:
     """Run command and return success status and output"""
     try:
         result = subprocess.run(
-            cmd, 
-            capture_output=True, 
-            text=True, 
+            cmd,
+            capture_output=True,
+            text=True,
             timeout=10,
             cwd=cwd
         )
@@ -61,7 +60,7 @@ def run_command(cmd: List[str], cwd: str = None) -> Tuple[bool, str]:
 def test_uv():
     """Test uv installation and version"""
     print_test(1, "Testing uv (our Python gateway)")
-    
+
     success, output = run_command(["uv", "--version"])
     if success:
         version = output.strip().split()[-1]
@@ -74,12 +73,12 @@ def test_uv():
 def test_node():
     """Test Node.js for AI Terminal"""
     print_test(2, "Testing Node.js (for AI Terminal)")
-    
+
     success, output = run_command(["node", "--version"])
     if success:
         version = output.strip()
         print_success(f"Node.js {version}")
-        
+
         # Check npm
         npm_success, npm_output = run_command(["npm", "--version"])
         if npm_success:
@@ -96,7 +95,7 @@ def test_node():
 async def test_lm_studio():
     """Test LM Studio connection and models"""
     print_test(3, "Testing LM Studio")
-    
+
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get("http://localhost:1234/v1/models", timeout=5) as response:
@@ -104,7 +103,7 @@ async def test_lm_studio():
                     data = await response.json()
                     models = data.get('data', [])
                     model_names = [model['id'] for model in models]
-                    
+
                     print_success(f"LM Studio: OK - {len(models)} models loaded")
                     for model in model_names:
                         print(f"   - {model}")
@@ -112,19 +111,19 @@ async def test_lm_studio():
                 else:
                     print_error("LM Studio not responding properly")
                     return False
-    except Exception as e:
+    except Exception:
         print_error("LM Studio not running - start LM Studio and load a model")
         return False
 
 def test_rust():
     """Test Rust installation"""
     print_test(4, "Testing Rust (for PostDevAI)")
-    
+
     success, output = run_command(["rustc", "--version"])
     if success:
         version = output.strip().split()[1]
         print_success(f"Rust {version}")
-        
+
         cargo_success, cargo_output = run_command(["cargo", "--version"])
         if cargo_success:
             cargo_version = cargo_output.strip().split()[1]
@@ -140,45 +139,45 @@ def test_rust():
 def test_ai_terminal():
     """Test AI Terminal component"""
     print_test(5, "Testing AI Terminal component")
-    
+
     ai_terminal_path = Path("ai-terminal")
     if not ai_terminal_path.exists():
         print_error("ai-terminal directory not found")
         return False
-    
+
     # Check package.json
     package_json = ai_terminal_path / "package.json"
     if not package_json.exists():
         print_error("package.json not found in ai-terminal")
         return False
-    
+
     # Check node_modules
     node_modules = ai_terminal_path / "node_modules"
     if not node_modules.exists():
         print_warning("node_modules not found - run: cd ai-terminal && npm install")
         return False
-    
+
     print_success("AI Terminal: Ready")
     return True
 
 def test_lbrxchat():
     """Test LBRXCHAT component"""
     print_test(6, "Testing LBRXCHAT (RAG System)")
-    
+
     lbrxchat_path = Path("lbrxchat")
     if not lbrxchat_path.exists():
         print_error("lbrxchat directory not found")
         return False
-    
+
     # Test uv project
     success, output = run_command(["uv", "run", "python", "--version"], cwd="lbrxchat")
     if success:
         python_version = output.strip().split()[-1]
         print_success(f"LBRXCHAT Python: {python_version}")
-        
+
         # Test main module
         module_success, module_output = run_command(
-            ["uv", "run", "python", "-m", "lbrxchat", "--help"], 
+            ["uv", "run", "python", "-m", "lbrxchat", "--help"],
             cwd="lbrxchat"
         )
         if module_success:
@@ -194,26 +193,26 @@ def test_lbrxchat():
 def test_postdevai():
     """Test PostDevAI component"""
     print_test(7, "Testing PostDevAI (Work in Progress)")
-    
+
     postdevai_path = Path("PostDevAi")
     if not postdevai_path.exists():
         print_warning("PostDevAi directory not found (WIP - optional)")
         return True  # Return True as it's work in progress
-    
+
     # Check Rust binaries
     dragon_node = postdevai_path / "target" / "release" / "dragon_node"
     developer_node = postdevai_path / "target" / "release" / "developer_node"
-    
+
     if dragon_node.exists():
         print_success("Dragon Node binary: OK (WIP)")
     else:
         print_warning("Dragon Node not built (WIP - optional) - run: cd PostDevAi && cargo build --release")
-    
+
     if developer_node.exists():
         print_success("Developer Node binary: OK (WIP)")
     else:
         print_warning("Developer Node not built (WIP - optional) - run: cd PostDevAi && cargo build --release")
-    
+
     # Test Python component
     success, output = run_command(["uv", "run", "python", "--version"], cwd="PostDevAi")
     if success:
@@ -221,18 +220,18 @@ def test_postdevai():
         print_success(f"PostDevAI Python: {python_version} (WIP)")
     else:
         print_warning("PostDevAI uv environment not ready (WIP - optional) - run: cd PostDevAi && uv sync")
-    
+
     return True  # Always return True as it's work in progress
 
 def test_cli_component():
     """Test CLI component"""
     print_test(8, "Testing CLI component")
-    
+
     cli_path = Path("cli")
     if not cli_path.exists():
         print_error("cli directory not found")
         return False
-    
+
     # Test uv project
     success, output = run_command(["uv", "run", "python", "cli_panda.py", "--help"], cwd="cli")
     if success:
@@ -245,7 +244,7 @@ def test_cli_component():
 def test_mlx():
     """Test MLX availability (Apple Silicon)"""
     print_test(9, "Testing MLX (Apple Silicon AI)")
-    
+
     try:
         success, output = run_command(["uv", "run", "python", "-c", "import mlx.core as mx; print(f'MLX: {mx.__version__}')"], cwd="lbrxchat")
         if success and "MLX:" in output:
@@ -262,7 +261,7 @@ def test_mlx():
 async def test_lm_studio_chat():
     """Test LM Studio chat functionality with streaming"""
     print_test(10, "Testing LM Studio chat with streaming (45s timeout)")
-    
+
     try:
         # Set 45 second timeout for the entire session
         timeout = aiohttp.ClientTimeout(total=45)
@@ -274,7 +273,7 @@ async def test_lm_studio_chat():
                 ],
                 "stream": True
             }
-            
+
             async with session.post(
                 "http://localhost:1234/v1/chat/completions",
                 json=payload
@@ -282,7 +281,7 @@ async def test_lm_studio_chat():
                 if response.status == 200:
                     print_success("LM Studio streaming chat:")
                     print("-" * 60)
-                    
+
                     full_response = ""
                     async for line in response.content:
                         line = line.decode('utf-8').strip()
@@ -297,7 +296,7 @@ async def test_lm_studio_chat():
                                         full_response += content
                             except json.JSONDecodeError:
                                 continue
-                    
+
                     print()
                     print("-" * 60)
                     print_success("Streaming complete!")
@@ -305,7 +304,7 @@ async def test_lm_studio_chat():
                 else:
                     print_error("LM Studio chat failed")
                     return False
-    except asyncio.TimeoutError:
+    except TimeoutError:
         print_error("LM Studio chat test timed out after 45 seconds")
         return False
     except Exception as e:
@@ -315,7 +314,7 @@ async def test_lm_studio_chat():
 async def main():
     """Run all tests"""
     print_header()
-    
+
     tests = [
         ("uv", test_uv),
         ("Node.js", test_node),
@@ -328,9 +327,9 @@ async def main():
         ("MLX", test_mlx),
         ("LM Studio Chat", test_lm_studio_chat)  # Now at the end with 45s timeout
     ]
-    
+
     results = {}
-    
+
     for name, test_func in tests:
         try:
             if asyncio.iscoroutinefunction(test_func):
@@ -342,19 +341,19 @@ async def main():
             print_error(f"{name} test failed: {str(e)}")
             results[name] = False
         print()
-    
+
     # Summary
     print("=" * 50)
     print_test("🏁", "Test complete")
-    
+
     passed = sum(results.values())
     total = len(results)
-    
+
     if passed == total:
         print_success(f"All {total} tests passed! CLI Panda is ready to rock! 🚀")
     else:
         print_warning(f"{passed}/{total} tests passed")
-        
+
         failed_tests = [name for name, result in results.items() if not result]
         if failed_tests:
             print()

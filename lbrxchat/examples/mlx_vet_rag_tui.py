@@ -20,39 +20,35 @@ Requirements:
     - lmstudio
 """
 
-import os
-import sys
 import json
-import time
-import asyncio
 import threading
-import tempfile
-import shutil
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union, Callable
-import subprocess
+from typing import Any, Callable, Dict, List, Optional
+
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
-from rich.markdown import Markdown
-from rich.syntax import Syntax
-from rich.panel import Panel
-from rich.text import Text
-from rich.table import Table
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
-from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, Vertical
-from textual.widgets import (
-    Header, Footer, Button, Static, Input, Label,
-    Select, OptionList, Log, RichLog,
-)
-from textual.reactive import reactive
-from textual.binding import Binding
-from textual import events
-from textual.widgets.option_list import Option
 
 # LM Studio and Requests for API access
 import requests
+from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
+from textual.app import App, ComposeResult
+from textual.binding import Binding
+from textual.containers import Container
+from textual.widgets import (
+    Button,
+    Footer,
+    Header,
+    Input,
+    Label,
+    RichLog,
+    Select,
+    Static,
+)
+
 try:
     from lmstudio import Client as LMStudioClient
     LMSTUDIO_NATIVE_API = True
@@ -266,7 +262,7 @@ class VetRAGSystem:
             callback("Saving index...", 0.8)
         
         index_data = []
-        for i, (doc, embedding) in enumerate(zip(documents, embeddings)):
+        for i, (doc, embedding) in enumerate(zip(documents, embeddings, strict=False)):
             index_data.append({
                 "id": i,
                 "content": doc["content"],

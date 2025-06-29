@@ -8,10 +8,8 @@ LM Studio Native API Test
 Simple test script to demonstrate the usage of the LM Studio Python library.
 """
 
-import os
-import sys
-from pprint import pprint
 from lmstudio import Client
+
 
 def print_section(title):
     """Print a section title with formatting"""
