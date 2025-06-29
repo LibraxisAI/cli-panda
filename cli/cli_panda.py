@@ -22,6 +22,12 @@ import sys
 
 import aiohttp
 
+# Import model manager
+try:
+    from .model_manager import setup_model, list_models, download_model
+except ImportError:
+    from model_manager import setup_model, list_models, download_model
+
 # Ustaw locale na UTF-8
 try:
     locale.setlocale(locale.LC_ALL, 'pl_PL.UTF-8')
@@ -581,10 +587,12 @@ async def main():
 
     # Polecenie model
     model_parser = subparsers.add_parser('model', help='Zarządzanie modelami')
-    model_parser.add_argument('--list', action='store_true', help='Lista modeli')
+    model_parser.add_argument('--list', action='store_true', help='Lista lokalnych modeli')
     model_parser.add_argument('--status', action='store_true', help='Status modeli')
     model_parser.add_argument('--load', metavar='NAME', help='Załaduj model')
     model_parser.add_argument('--unload', metavar='NAME', help='Wyładuj model')
+    model_parser.add_argument('--setup', action='store_true', help='Interaktywna konfiguracja modelu')
+    model_parser.add_argument('--download', metavar='MODEL_ID', help='Pobierz model z HuggingFace')
 
     # Domyślne argumenty
     parser.add_argument("command", nargs="?", help="Command or question for AI")
@@ -599,8 +607,12 @@ async def main():
 
     # Obsługa poleceń model
     if args.mode == 'model':
-        if args.list:
-            await model_operations(args.url, 'list')
+        if args.setup:
+            await setup_model()
+        elif args.list:
+            await list_models()
+        elif args.download:
+            await download_model(args.download)
         elif args.status:
             await model_operations(args.url, 'status')
         elif args.load:
@@ -608,7 +620,7 @@ async def main():
         elif args.unload:
             await model_operations(args.url, 'unload', args.unload)
         else:
-            print("Użyj: ai model --list | --status | --load <nazwa> | --unload <nazwa>")
+            print("Użyj: panda model --setup | --list | --download <id> | --status | --load <nazwa> | --unload <nazwa>")
         return
 
     # Initialize AI helper

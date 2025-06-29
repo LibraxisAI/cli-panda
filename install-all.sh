@@ -293,7 +293,7 @@ install_cli() {
 #!/bin/bash
 # CLI Panda runner script
 CLI_PANDA_DIR="$HOME/cli-panda"
-cd "$CLI_PANDA_DIR" && uv run python cli/cli_panda.py "$@"
+cd "$CLI_PANDA_DIR" && uv run --project . -- python cli/cli_panda.py "$@"
 EOF
     chmod +x ~/.local/bin/cli-panda
     

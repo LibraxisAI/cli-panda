@@ -1,6 +1,6 @@
 [project]
 name = "cli-panda"
-version = "0.2.1"
+version = "0.2.2"
 description = "CLI Panda - AI-powered terminal ecosystem with RAG and distributed memory"
 authors = [
     { name = "Maciej Gad", email = "maciej@libraxis.ai" },
@@ -29,6 +29,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "ruff>=0.12.1",
     "pytest>=8.4.1",
+    "lmstudio>=1.4.0",
 ]
 
 [project.optional-dependencies]

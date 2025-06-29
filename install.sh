@@ -196,10 +196,25 @@ main() {
         printf "  3. Use inline AI assistance:\n"
         printf "     ${BLUE}??${NC} your question here\n"
         printf "\n"
-        printf "${YELLOW}Remember to:${NC}\n"
-        printf "  • Download LM Studio from https://lmstudio.ai\n"
-        printf "  • Load the qwen3-8b model\n"
-        printf "  • Start the local server (port 1234)\n"
+        
+        # Model setup prompt
+        printf "${MAGENTA}Would you like to set up a local AI model now?${NC}\n"
+        printf "This will download a model optimized for your Mac.\n"
+        printf "${YELLOW}(Recommended: LibraxisAI/qwen3-8b-MLX-Q5 ~5GB)${NC}\n"
+        printf "\nSetup model? [Y/n] "
+        read -r response
+        
+        if [[ "$response" != "n" ]] && [[ "$response" != "N" ]]; then
+            printf "\n${BLUE}Setting up AI model...${NC}\n"
+            cd "$INSTALL_DIR"
+            uv run --project . -- python cli/model_manager.py setup || {
+                printf "${YELLOW}Model setup can be run later with: panda model setup${NC}\n"
+            }
+        else
+            printf "\n${YELLOW}You can set up a model later with:${NC}\n"
+            printf "  ${BLUE}panda model setup${NC}\n"
+        fi
+        
         printf "\n"
         printf "${GREEN}Happy coding with CLI Panda! 🐼${NC}\n"
     else
