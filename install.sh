@@ -140,7 +140,15 @@ setup_shell() {
 
 # CLI Panda AI Terminal
 export PATH="$HOME/.local/bin:$PATH"
-[ -f "$HOME/.zsh/cli-panda/init.zsh" ] && source "$HOME/.zsh/cli-panda/init.zsh"
+
+# CLI Panda commands (using uv)
+alias cli-panda="$HOME/.local/bin/cli-panda"
+alias panda="$HOME/.local/bin/panda"
+alias ai="$HOME/.local/bin/cli-panda"
+
+# ZSH integration (if you want advanced features)
+# Uncomment the line below to enable:
+# [ -f "$HOME/.zsh/cli-panda/init.zsh" ] && source "$HOME/.zsh/cli-panda/init.zsh"
 EOF
         printf "${GREEN}✅ Added CLI Panda to ~/.zshrc${NC}\n"
     fi

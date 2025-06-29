@@ -22,38 +22,11 @@ classifiers = [
 ]
 
 dependencies = [
-    # MLX for Apple Silicon acceleration
-    "mlx>=0.8.0",
-    "mlx-lm>=0.4.0",
-    
-    # Core AI/ML
-    "torch>=2.0.0",
-    "transformers>=4.35.0",
-    "sentence-transformers>=2.2.0",
-    "langchain>=0.1.0",
-    "openai>=1.0.0",
-    
-    # Vector stores
-    "chromadb>=0.4.0",
-    "faiss-cpu>=1.7.4",
-    
-    # Data processing
-    "numpy>=1.24.0",
-    "pandas>=2.0.0",
-    "pydantic>=2.0.0",
-    
-    # API & async
-    "fastapi>=0.104.0",
-    "uvicorn>=0.24.0",
-    "httpx>=0.25.0",
+    # Core dependencies only
     "aiohttp>=3.9.0",
-    "aiofiles>=23.0.0",
-    
-    # Utils
-    "python-dotenv>=1.0.0",
     "rich>=13.0.0",
-    "typer>=0.9.0",
-    "pyyaml>=6.0",
+    "click>=8.0.0",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -69,8 +42,6 @@ dev = [
 
 [project.scripts]
 cli-panda = "cli.cli_panda:main"
-cli-panda-rag = "lbrxchat.main:app"
-cli-panda-memory = "PostDevAi.main:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -78,6 +49,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["cli", "lbrxchat", "PostDevAi"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.ruff]
 line-length = 88
@@ -126,6 +100,3 @@ omit = ["*/tests/*", "*/test_*.py"]
 precision = 2
 show_missing = true
 skip_covered = false
-
-# UV specific configuration - removed for now
-# [tool.uv] settings not needed in current version

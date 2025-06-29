@@ -274,30 +274,38 @@ install_postdevai() {
 install_cli() {
     echo -e "\n${BLUE}Installing CLI component (Python)...${NC}"
     
-    cd cli
+    # Create virtual environment and sync dependencies
+    info "Creating virtual environment with uv..."
+    uv venv
     
-    # Initialize if needed
-    if [ ! -f "pyproject.toml" ]; then
-        uv init .
-        # Add core dependencies
-        uv add aiohttp rich
-    fi
+    # Add core dependencies
+    uv add aiohttp rich click
     
-    # Sync dependencies
+    # Sync all dependencies
     uv sync
     
     # Make executable
-    chmod +x cli_panda.py
+    chmod +x cli/cli_panda.py
     
-    # Create global runner script
+    # Create global runner script that uses the project's venv
+    mkdir -p ~/.local/bin
     cat > ~/.local/bin/cli-panda << 'EOF'
 #!/bin/bash
-cd "$(dirname "$0")/../../../cli-panda/cli" && uv run python cli_panda.py "$@"
+# CLI Panda runner script
+CLI_PANDA_DIR="$HOME/cli-panda"
+cd "$CLI_PANDA_DIR" && uv run python cli/cli_panda.py "$@"
 EOF
     chmod +x ~/.local/bin/cli-panda
     
-    cd ..
-    success "CLI component installed - use 'cli-panda' command"
+    # Also create convenience aliases
+    cat > ~/.local/bin/panda << 'EOF'
+#!/bin/bash
+# Panda shortcut
+exec "$HOME/.local/bin/cli-panda" "$@"
+EOF
+    chmod +x ~/.local/bin/panda
+    
+    success "CLI component installed - use 'cli-panda' or 'panda' command"
 }
 
 # Setup configuration
